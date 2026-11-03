@@ -1,6 +1,23 @@
 import Link from 'next/link';
+import { db } from '@/lib/db';
 
-export default function HomePage() {
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  const result = await db.query(
+    `SELECT
+       COUNT(*) FILTER (
+         WHERE status NOT IN ('resolved', 'closed')
+       )::int AS open_issues,
+       COUNT(*) FILTER (
+         WHERE status NOT IN ('resolved', 'closed')
+           AND sla_deadline <= now() + interval '24 hours'
+       )::int AS at_risk,
+       COUNT(*) FILTER (WHERE escalation_level > 0)::int AS escalated
+     FROM complaints;`
+  );
+  const stats = result.rows[0];
+
   return (
     <main className="shell">
       <section className="hero">
@@ -19,15 +36,15 @@ export default function HomePage() {
       <section className="grid stats">
         <div className="card">
           <span>Open issues</span>
-          <strong>24</strong>
+          <strong>{stats.open_issues}</strong>
         </div>
         <div className="card">
           <span>At risk</span>
-          <strong>7</strong>
+          <strong>{stats.at_risk}</strong>
         </div>
         <div className="card">
           <span>Escalated</span>
-          <strong>3</strong>
+          <strong>{stats.escalated}</strong>
         </div>
       </section>
     </main>

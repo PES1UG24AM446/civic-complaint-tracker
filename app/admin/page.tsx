@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 
-type Department = { dept_id: number; name: string };
+type Department = { dept_id: number; name: string; parent_dept_id: number | null };
 type Category = { category_id: number; name: string; dept_id: number; department: string };
 type User = { user_id: number; name: string; email: string; role: string; dept_id: number | null; department: string | null };
 type SlaRule = { category_id: number; category: string; priority: string; resolve_hours: number; escalate_after_hours: number };
@@ -32,6 +32,7 @@ export default function AdminPage() {
   const [overdueQuery, setOverdueQuery] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [escalating, setEscalating] = useState(false);
 
   async function refresh() {
     try {
@@ -118,6 +119,21 @@ export default function AdminPage() {
     }
   }
 
+  async function handleEscalate() {
+    setMessage('');
+    setError('');
+    setEscalating(true);
+    try {
+      const result = await requestJson('/api/escalations', 'POST');
+      setMessage(`${result.escalated_count} overdue complaint(s) escalated.`);
+      await refresh();
+    } catch (escalationError) {
+      setError(escalationError instanceof Error ? escalationError.message : 'Unable to process escalations.');
+    } finally {
+      setEscalating(false);
+    }
+  }
+
   return (
     <main className="shell">
       <header className="page-header">
@@ -145,6 +161,14 @@ export default function AdminPage() {
                 <strong>{department.name}</strong>
                 <form onSubmit={(event) => handleCreate(event, () => `/api/departments/${department.dept_id}`, 'PATCH')}>
                   <label>Department name<input name="name" defaultValue={department.name} required minLength={2} maxLength={100} /></label>
+                  <label>Parent department
+                    <select name="parent_dept_id" defaultValue={department.parent_dept_id ?? ''}>
+                      <option value="">None (top-level)</option>
+                      {departments.filter((option) => option.dept_id !== department.dept_id).map((option) => (
+                        <option key={option.dept_id} value={option.dept_id}>{option.name}</option>
+                      ))}
+                    </select>
+                  </label>
                   <button type="submit">Save department</button>
                   <button type="button" className="button secondary" onClick={() => { void handleDelete(`/api/departments/${department.dept_id}`, `department "${department.name}"`); }}>Delete department</button>
                 </form>
@@ -165,6 +189,14 @@ export default function AdminPage() {
           </div>
           <form onSubmit={(event) => handleCreate(event, () => '/api/departments')}>
             <label>New department<input name="name" required minLength={2} maxLength={100} /></label>
+            <label>Parent department (optional)
+              <select name="parent_dept_id" defaultValue="">
+                <option value="">None (top-level)</option>
+                {departments.map((department) => (
+                  <option key={department.dept_id} value={department.dept_id}>{department.name}</option>
+                ))}
+              </select>
+            </label>
             <button type="submit">Add department</button>
           </form>
           <form onSubmit={(event) => handleCreate(event, (form) => `/api/departments/${form.get('dept_id')}/categories`)} style={{ marginTop: 20 }}>
@@ -216,6 +248,9 @@ export default function AdminPage() {
         </div>
         <div className="panel">
           <h3>Overdue complaints</h3>
+          <button type="button" onClick={() => { void handleEscalate(); }} disabled={escalating}>
+            {escalating ? 'Processing…' : 'Run escalations'}
+          </button>
           <label>
             Search overdue list
             <input value={overdueQuery} onChange={(event) => setOverdueQuery(event.target.value)} placeholder="Filter department, title, or status" />

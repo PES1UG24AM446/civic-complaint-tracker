@@ -13,13 +13,13 @@ async function validateParentDepartment(parentDeptId: number | null, departmentI
   if (parentDeptId === null) return;
   const cycleCheck = await db.query(
     `WITH RECURSIVE descendants AS (
-       SELECT dept_id, parent_dept_id FROM departments WHERE dept_id = $1
+       SELECT dept_id, parent_dept_id FROM departments WHERE dept_id = $2
        UNION ALL
        SELECT d.dept_id, d.parent_dept_id
        FROM departments d
        JOIN descendants s ON s.dept_id = d.parent_dept_id
      )
-     SELECT 1 FROM descendants WHERE dept_id = $2 LIMIT 1;`,
+     SELECT 1 FROM descendants WHERE dept_id = $1 LIMIT 1;`,
     [parentDeptId, departmentId]
   );
   if ((cycleCheck.rowCount ?? 0) > 0) {

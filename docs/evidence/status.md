@@ -6,9 +6,11 @@
 - `npm run lint` — passed
 - `npm run ddl-demo` — passed against a disposable PostgreSQL database; the database was dropped after the run
 - `npm run test:integration` — passed against local PostgreSQL and MongoDB; the test runner used and removed a disposable PostgreSQL database
+- Playwright UI checks — registration, sign-in/sign-out, complaint submission/detail/search, comment create/edit/delete, officer claim/status updates, admin department/category/user/SLA CRUD, hierarchy display/cycle rejection, and escalation processing passed
 
 ## Safety notes
 - The existing `civic_db` was not reset or reseeded.
+- Browser QA used an isolated PostgreSQL database and cleaned up its MongoDB documents.
 - The standalone `npm run escalate` was not run against `civic_db`, because it can change complaint escalation levels. The integration suite verified the escalation workflow on test data.
 - `.env.local` contains local generated secrets and is excluded from Git.
 

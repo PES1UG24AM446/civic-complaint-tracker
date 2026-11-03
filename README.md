@@ -6,7 +6,8 @@ This project is a Next.js application for civic complaint tracking with SLA-base
 - Citizen registration and complaint submission with category + priority + location metadata
 - Full-text search and status/priority/category filtering for complaint lists
 - Officer department dashboard, ownership assignment, and SLA visibility
-- Admin management for departments, categories, users, SLA rules, and hierarchy reporting
+- Admin management for departments, hierarchy, categories, users, SLA rules, reports, and overdue escalations
+- Live PostgreSQL-backed homepage counts for open, at-risk, and escalated complaints
 - PostgreSQL triggers, procedure, views, and escalation logic with MongoDB comment threads
 - Comment edit/delete support and MongoDB aggregation summary endpoints
 

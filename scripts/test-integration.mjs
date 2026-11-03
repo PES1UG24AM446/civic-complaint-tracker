@@ -182,6 +182,24 @@ try {
   assertStatus(await requestJson(baseUrl, `/api/departments/${departmentId}`, {
     method: 'PATCH', body: { name: 'Updated integration department' }, cookie: adminCookie,
   }), 200, 'Admin can rename a department');
+  const childDepartment = await requestJson(baseUrl, '/api/departments', {
+    method: 'POST',
+    body: { name: 'Integration child department', parent_dept_id: departmentId },
+    cookie: adminCookie,
+  });
+  assertStatus(childDepartment, 201, 'Admin can create a child department');
+  const childDepartmentId = childDepartment.data.department.dept_id;
+  const departmentTree = await requestJson(baseUrl, '/api/departments?report=tree', { cookie: adminCookie });
+  assertStatus(departmentTree, 200, 'Admin can read the department hierarchy');
+  assert.ok(departmentTree.data.some((row) =>
+    row.path === 'Updated integration department > Integration child department'
+  ), 'Department tree includes the parent/child path');
+  assertStatus(await requestJson(baseUrl, `/api/departments/${departmentId}`, {
+    method: 'PATCH', body: { parent_dept_id: childDepartmentId }, cookie: adminCookie,
+  }), 409, 'Department hierarchy rejects a parent cycle');
+  assertStatus(await requestJson(baseUrl, `/api/departments/${childDepartmentId}`, {
+    method: 'DELETE', cookie: adminCookie,
+  }), 200, 'Admin can delete an unused child department');
 
   const category = await requestJson(baseUrl, `/api/departments/${departmentId}/categories`, {
     method: 'POST', body: { name: 'Integration category' }, cookie: adminCookie,
