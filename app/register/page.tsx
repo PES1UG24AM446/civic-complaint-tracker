@@ -1,11 +1,9 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -29,8 +27,7 @@ export default function RegisterPage() {
         setError(result.error || 'Unable to create account.');
         return;
       }
-      router.push('/complaints');
-      router.refresh();
+      window.location.assign('/complaints');
     } catch {
       setError('Could not reach the server. Please try again.');
     } finally {

@@ -1,11 +1,9 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -28,8 +26,7 @@ export default function LoginPage() {
         setError(result.error || 'Unable to log in.');
         return;
       }
-      router.push(result.user.role === 'admin' ? '/admin' : result.user.role === 'officer' ? '/officer' : '/complaints');
-      router.refresh();
+      window.location.assign(result.user.role === 'admin' ? '/admin' : result.user.role === 'officer' ? '/officer' : '/complaints');
     } catch {
       setError('Could not reach the server. Please try again.');
     } finally {
