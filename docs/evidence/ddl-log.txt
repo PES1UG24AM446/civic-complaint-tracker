@@ -1,0 +1,7 @@
+--- schema.sql ---
+schema.sql applied successfully
+--- migration 002_department_hierarchy.sql ---
+migration 002_department_hierarchy.sql applied successfully
+--- db/ddl-demo.sql ---
+db/ddl-demo.sql executed successfully
+tables now in schema: categories, complaint_history, complaints, departments, escalations, sla_rules, users, v_department_tree, v_dept_performance, v_overdue_complaints

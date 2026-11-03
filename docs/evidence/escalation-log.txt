@@ -1,0 +1,6 @@
+Escalation function validation
+==============================
+
+`npm run test:integration` passed against local PostgreSQL and MongoDB. Its disposable PostgreSQL database exercised overdue escalation through the API and verified escalation records and workflow behavior.
+
+The standalone script `npm run escalate` calls `fn_escalate_overdue()` and reports recent escalation rows. It was not run against the existing `civic_db`, because that script can modify overdue complaint records. Run it only against a disposable/demo database.
